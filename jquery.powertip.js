@@ -82,33 +82,35 @@
 			);
 		});
 
-		// attach hover events to all matched elements
-		this.on({
-			// mouse events
-			mouseenter: function elementMouseEnter(event) {
-				trackMouse(event);
-				session.previousX = event.pageX;
-				session.previousY = event.pageY;
-				$(this).data('displayController').show();
-			},
-			mouseleave: function elementMouseLeave() {
-				$(this).data('displayController').hide();
-			},
+		if (!options.manual) {
+			// attach hover events to all matched elements
+			this.on({
+				// mouse events
+				mouseenter: function elementMouseEnter(event) {
+					trackMouse(event);
+					session.previousX = event.pageX;
+					session.previousY = event.pageY;
+					$(this).data('displayController').show();
+				},
+				mouseleave: function elementMouseLeave() {
+					$(this).data('displayController').hide();
+				},
 
-			// keyboard events
-			focus: function elementFocus() {
-				$(this).data('displayController').show(true);
-			},
-			blur: function elementBlur() {
-				$(this).data('displayController').hide(true);
-			},
-			keydown: function elementKeyDown(event) {
-				// close tooltip when the escape key is pressed
-				if (event.keyCode === 27) {
+				// keyboard events
+				focus: function elementFocus() {
+					$(this).data('displayController').show(true);
+				},
+				blur: function elementBlur() {
 					$(this).data('displayController').hide(true);
+				},
+				keydown: function elementKeyDown(event) {
+					// close tooltip when the escape key is pressed
+					if (event.keyCode === 27) {
+						$(this).data('displayController').hide(true);
+					}
 				}
-			}
-		});
+			});
+		}
 
 		return this;
 
