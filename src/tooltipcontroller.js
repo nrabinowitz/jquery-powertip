@@ -132,23 +132,35 @@ function TooltipController(options) {
 			}
 		});
 
-		// if we want to be able to mouse on to the tooltip then we need to
+		// If we want to be able to mouse on to the tooltip then we need to
 		// attach hover events to the tooltip that will cancel a close request
 		// on mouseenter and start a new close request on mouseleave
-		// only hook these listeners if we're not in manual mode
+		// only hook these listeners if we're not in manual mode.
+		//
+		// It's possible there won't be a display controller available to the
+		// event handlers. This will happen for example if activeHover has been
+		// removed from the DOM with $.remove, which strips the elements data.
+		// If that's the case, nothing has to be done, the tip will be closed
+		// by the desync handler.
 		if (options.mouseOnToPopup && !options.manual) {
 			tipElement.on('mouseenter' + EVENT_NAMESPACE, function tipMouseEnter() {
 				// check activeHover in case the mouse cursor entered the
 				// tooltip during the fadeOut and close cycle
 				if (session.activeHover) {
-					session.activeHover.data(DATA_DISPLAYCONTROLLER).cancel();
+					var displayController = session.activeHover.data(DATA_DISPLAYCONTROLLER);
+					if (displayController) {
+						displayController.cancel();
+					}
 				}
 			});
 			tipElement.on('mouseleave' + EVENT_NAMESPACE, function tipMouseLeave() {
 				// check activeHover in case the mouse cursor left the tooltip
 				// during the fadeOut and close cycle
 				if (session.activeHover) {
-					session.activeHover.data(DATA_DISPLAYCONTROLLER).hide();
+					var displayController = session.activeHover.data(DATA_DISPLAYCONTROLLER);
+					if (displayController) {
+						displayController.hide();
+					}
 				}
 			});
 		}
@@ -379,7 +391,11 @@ function TooltipController(options) {
 				// for tooltips opened via the api: we need to check if it has
 				// the forcedOpen flag.
 				if (!isMouseOver(session.activeHover) && !session.activeHover.is(':focus') && !session.activeHover.data(DATA_FORCEDOPEN)) {
-					if (tipElement.data(DATA_MOUSEONTOTIP)) {
+					if (tipElement.data(DATA_MOUSEONTOTIP) ||
+						// check if the activeHover still has a display
+						// controller, which it wouldn't e.g. if it was removed
+						// from the DOM using jQuery's remove method
+						!session.activeHover.data(DATA_DISPLAYCONTROLLER)) {
 						if (!isMouseOver(tipElement)) {
 							isDesynced = true;
 						}

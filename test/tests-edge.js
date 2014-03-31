@@ -35,6 +35,34 @@ $(function() {
 	});
 	$('#auto-disable-button input').powerTip({ placement: 'e' });
 
+	// Disappearing button
+	var disappearingButtonOpts = {
+		openEvents: [ 'click' ],
+		placement: 'e',
+		mouseOnToPopup: true
+	};
+
+	$('#disappearing-button input')
+		.powerTip(disappearingButtonOpts)
+		.on('click', function disappearingClickHandler() {
+			var $btn = $(this),
+				content = $btn.data(DATA_POWERTIP);
+
+			// hook up mouse events to popup - remove on mouse enter, add back
+			// in when mouse leaves
+			$('#' + $.fn.powerTip.defaults.popupId)
+				.one('mouseenter.disappearingButton', function() {
+					$btn.remove();
+				})
+				.one('mouseleave.disappearingButton', function() {
+					$btn.appendTo('#disappearing-button');
+					// recreate tooltip text and powertip and event handler
+					$btn.on('click', disappearingClickHandler);
+					$btn.data(DATA_POWERTIP, content);
+					$btn.powerTip(disappearingButtonOpts);
+				});
+		});
+
 	// Long delay tooltips
 	$('#long-delay #first-button').powerTip({ closeDelay: 2000, mouseOnToPopup: true });
 	$('#long-delay #second-button').powerTip({ closeDelay: 2000 });
