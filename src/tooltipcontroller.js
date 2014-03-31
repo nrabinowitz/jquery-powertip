@@ -191,8 +191,10 @@ function TooltipController(options) {
 		session.desyncTimeout = clearInterval(session.desyncTimeout);
 
 		// reset element state
-		element.data(DATA_HASACTIVEHOVER, false);
-		element.data(DATA_FORCEDOPEN, false);
+		if (element) {
+			element.data(DATA_HASACTIVEHOVER, false);
+			element.data(DATA_FORCEDOPEN, false);
+		}
 
 		// remove document click handler
 		$document.off('click' + EVENT_NAMESPACE);
@@ -217,7 +219,9 @@ function TooltipController(options) {
 			tipElement.css(coords);
 
 			// trigger powerTipClose event
-			element.trigger('powerTipClose');
+			if (element) {
+				element.trigger('powerTipClose');
+			}
 		});
 	}
 

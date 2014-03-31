@@ -256,7 +256,7 @@ $(function() {
 
 	test('PowerTip will handle disappearing targets gracefully (mouseenter)', function() {
 		var opts = { fadeInTime: 0, mouseOnToPopup: true },
-			element = $('<a title="This is the tooltip text"></a>').powerTip({ mouseOnToPopup: true }),
+			element = $('<a title="This is the tooltip text"></a>').powerTip(opts),
 			tipElem = $('#' + $.fn.powerTip.defaults.popupId);
 		// show tip
 		element.powerTip('show');
@@ -292,6 +292,57 @@ $(function() {
 		tipElem.trigger('mouseleave');
 
 		ok(true, 'PowerTip handled its target disappearing before mouseleave gracefully');
+	});
+
+	test('API destroy method will not fail when rapidly created, shown, and destroyed', function() {
+		expect(6);
+
+		// run PowerTip
+		var element = $('<a href="#" title="This is the tooltip text"></a>')
+			.powerTip()
+			.on({
+				powerTipClose: function() {
+					$(this).powerTip('destroy');
+				}
+			});
+
+		strictEqual(session.tooltips.length, 1, 'PowerTip tooltip element created');
+
+		// this bug happens when powerTip is initialized on top of an existing
+		// powerTip, shown, hidden, and destroyed all in the same breath.
+		element.powerTip()
+			.powerTip('show')
+			.powerTip('hide');
+
+		// placeholder message to show on script error
+		ok(true, 'PowerTip re-created, shown, hidden, and destroyed without error');
+
+		// check that elements were really destroyed
+		strictEqual(session.tooltips, null, 'PowerTip tooltip removed internally');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 0, 'tooltip element removed');
+
+		// check that events have been unhooked
+		session.currentX = 1;
+		$(document).trigger($.Event('mousemove', { pageX: 2, pageY: 3 }));
+		strictEqual(session.currentX, 1, 'document event removed');
+
+		// try to recreate and reopen a new powerTip
+		stop();
+		setTimeout(function showAgain() {
+			var showCalled = false;
+			element.powerTip()
+				.data(
+					DATA_DISPLAYCONTROLLER,
+					new MockDisplayController(
+						function() {
+							showCalled = true;
+						}
+					)
+				);
+			element.powerTip('show');
+			ok(showCalled, 'PowerTip recreated and show was called without error');
+			start();
+		}, 20);
 	});
 
 	function MockDisplayController(show, hide, cancel, resetPosition) {

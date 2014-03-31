@@ -338,7 +338,14 @@ $.powerTip = {
 			$window.off(EVENT_NAMESPACE);
 			$document.off(EVENT_NAMESPACE);
 			session.mouseTrackingActive = false;
-			session.tooltips.remove();
+			// It's possible in rare circumstances that the tooltip is already
+			// null here - if powerTip is reinstantiated, then shown and hidden
+			// in the same loop, and the `powerTipClose` event is handled by
+			// a function that calls destroy. In this case there is never a
+			// tooltip created anyway, so nothing has to be done to clean up.
+			if (session.tooltips) {
+				session.tooltips.remove();
+			}
 			session.tooltips = null;
 		}
 
