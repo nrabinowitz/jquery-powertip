@@ -54,7 +54,7 @@ $(function() {
 				.one('mouseenter.disappearingButton', function() {
 					$btn.remove();
 				})
-				.one('mouseleave.disapperingButton', function() {
+				.one('mouseleave.disappearingButton', function() {
 					$btn.appendTo('#disappearing-button');
 					// recreate tooltip text and powertip and event handler
 					$btn.on('click', disappearingClickHandler);

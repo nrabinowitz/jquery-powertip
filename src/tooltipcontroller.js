@@ -138,7 +138,7 @@ function TooltipController(options) {
 		// only hook these listeners if we're not in manual mode.
 		//
 		// It's possible there won't be a display controller available to the
-		// even handlers. This will happen for example if activeHover has been
+		// event handlers. This will happen for example if activeHover has been
 		// removed from the DOM with $.remove, which strips the elements data.
 		// If that's the case, nothing has to be done, the tip will be closed
 		// by the desync handler.
