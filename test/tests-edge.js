@@ -1,6 +1,27 @@
 $(function() {
 	'use strict';
 
+	var hugeText = [
+		'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sed',
+		'volutpat tellus. Fusce mollis iaculis est at sodales. Proin aliquam',
+		'bibendum neque, nec blandit orci porttitor non. Cras lacinia varius',
+		'felis vel ultricies. Nulla eu sapien arcu, dapibus tempor eros.',
+		'Praesent aliquet hendrerit commodo. Pellentesque habitant morbi',
+		'tristique senectus et netus et malesuada fames ac turpis egestas.',
+		'Proin gravida justo faucibus urna dictum id egestas velit hendrerit.',
+		'Praesent dapibus rutrum tempor. Sed ultrices varius purus, eu rhoncus',
+		'tortor scelerisque sit amet. Sed vitae molestie diam. Pellentesque',
+		'posuere euismod venenatis. Proin ut ligula vel urna lacinia accumsan.',
+		'Quisque commodo ultrices orci ut cursus. Aliquam in dolor orci. Nunc',
+		'pretium euismod odio.'
+	].join(' '),
+		disappearingButtonOpts = {
+			openEvents: [ 'click' ],
+			placement: 'e',
+			mouseOnToPopup: true
+		};
+
+
 	// Open on load
 	$('#open-on-load input').powerTip({ placement: 'ne' }).powerTip('show');
 
@@ -36,12 +57,6 @@ $(function() {
 	$('#auto-disable-button input').powerTip({ placement: 'e' });
 
 	// Disappearing button
-	var disappearingButtonOpts = {
-		openEvents: [ 'click' ],
-		placement: 'e',
-		mouseOnToPopup: true
-	};
-
 	$('#disappearing-button input')
 		.powerTip(disappearingButtonOpts)
 		.on('click', function disappearingClickHandler() {
@@ -74,20 +89,6 @@ $(function() {
 	$('#manual-and-interactive #interactive-button').powerTip({ mouseOnToPopup: true });
 
 	// setup huge text tooltips
-	var hugeText = [
-		'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sed',
-		'volutpat tellus. Fusce mollis iaculis est at sodales. Proin aliquam',
-		'bibendum neque, nec blandit orci porttitor non. Cras lacinia varius',
-		'felis vel ultricies. Nulla eu sapien arcu, dapibus tempor eros.',
-		'Praesent aliquet hendrerit commodo. Pellentesque habitant morbi',
-		'tristique senectus et netus et malesuada fames ac turpis egestas.',
-		'Proin gravida justo faucibus urna dictum id egestas velit hendrerit.',
-		'Praesent dapibus rutrum tempor. Sed ultrices varius purus, eu rhoncus',
-		'tortor scelerisque sit amet. Sed vitae molestie diam. Pellentesque',
-		'posuere euismod venenatis. Proin ut ligula vel urna lacinia accumsan.',
-		'Quisque commodo ultrices orci ut cursus. Aliquam in dolor orci. Nunc',
-		'pretium euismod odio.'
-	].join(' ');
 	$.each(
 		[
 			'north',
