@@ -254,6 +254,86 @@ $(function() {
 		strictEqual(session.currentX, 1, 'document event removed');
 	});
 
+	test('API destroy method will not fail when rapidly created, shown, and destroyed', function() {
+		// run PowerTip
+		var element = $('<a href="#" title="This is the tooltip text"></a>')
+			.powerTip()
+			.on({
+				powerTipClose: function() {
+					$(this).powerTip('destroy');
+				}
+			});
+
+		// this bug happens when powerTip is initialized on top of an existing
+		// powerTip, shown, hidden, and destroyed all in the same breath.
+		element.powerTip()
+			.powerTip('show')
+			.powerTip('hide');
+
+		ok(true, 'PowerTip re-created, shown, hidden, and destroyed without error');
+
+		// try to recreate and reopen a new powerTip
+		stop();
+		setTimeout(function showAgain() {
+			var showCalled = false;
+			element.powerTip()
+				.data(
+					DATA_DISPLAYCONTROLLER,
+					new MockDisplayController(
+						function() {
+							showCalled = true;
+						}
+					)
+				);
+			element.powerTip('show');
+			ok(showCalled, 'PowerTip recreated and show was called without error');
+			start();
+		}, 20);
+
+	});
+
+	test('PowerTip will handle disappearing targets gracefully (mouseenter)', function() {
+		var opts = { fadeInTime: 0, mouseOnToPopup: true },
+			element = $('<a title="This is the tooltip text"></a>').powerTip({ mouseOnToPopup: true }),
+			tipElem = $('#' + $.fn.powerTip.defaults.popupId);
+		// show tip
+		element.powerTip('show');
+
+		// put mouse over tooltip
+		stop();
+		setTimeout(function() {
+			start();
+			tipElem.trigger('mouseenter');
+		}, 10);
+
+		// remove element from page
+		element.remove();
+
+		ok(true, 'PowerTip handled its target disappearing before mouseenter gracefully');
+	});
+
+	test('PowerTip will handle disappearing targets gracefully (mouseleave)', function() {
+		var opts = { fadeInTime: 0, mouseOnToPopup: true },
+			element = $('<a title="This is the tooltip text"></a>').powerTip(opts),
+			tipElem = $('#' + $.fn.powerTip.defaults.popupId);
+
+		// show tip
+		element
+			.on('powerTipOpen', function() {
+				tipElem.trigger('mouseenter');
+			})
+			.powerTip('show');
+
+		// remove element from page
+		element.remove();
+
+		tipElem.trigger('mouseleave');
+
+		// now do the same, but make the error happen on mouseleave
+
+		ok(true, 'PowerTip handled its target disappearing before mouseleave gracefully');
+	});
+
 	function MockDisplayController(show, hide, cancel, resetPosition) {
 		this.show = show || $.noop;
 		this.hide = hide || $.noop;
