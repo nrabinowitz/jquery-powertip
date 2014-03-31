@@ -256,7 +256,7 @@ $(function() {
 
 	test('PowerTip will handle disappearing targets gracefully (mouseenter)', function() {
 		var opts = { fadeInTime: 0, mouseOnToPopup: true },
-			element = $('<a title="This is the tooltip text"></a>').powerTip({ mouseOnToPopup: true }),
+			element = $('<a title="This is the tooltip text"></a>').powerTip(opts),
 			tipElem = $('#' + $.fn.powerTip.defaults.popupId);
 		// show tip
 		element.powerTip('show');
@@ -295,6 +295,8 @@ $(function() {
 	});
 
 	test('API destroy method will not fail when rapidly created, shown, and destroyed', function() {
+		expect(6);
+
 		// run PowerTip
 		var element = $('<a href="#" title="This is the tooltip text"></a>')
 			.powerTip()
@@ -341,7 +343,6 @@ $(function() {
 			ok(showCalled, 'PowerTip recreated and show was called without error');
 			start();
 		}, 20);
-
 	});
 
 	function MockDisplayController(show, hide, cancel, resetPosition) {
