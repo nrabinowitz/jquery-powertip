@@ -304,13 +304,25 @@ $(function() {
 				}
 			});
 
+		strictEqual(session.tooltips.length, 1, 'PowerTip tooltip element created');
+
 		// this bug happens when powerTip is initialized on top of an existing
 		// powerTip, shown, hidden, and destroyed all in the same breath.
 		element.powerTip()
 			.powerTip('show')
 			.powerTip('hide');
 
+		// placeholder message to show on script error
 		ok(true, 'PowerTip re-created, shown, hidden, and destroyed without error');
+
+		// check that elements were really destroyed
+		strictEqual(session.tooltips, null, 'PowerTip tooltip removed internally');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 0, 'tooltip element removed');
+
+		// check that events have been unhooked
+		session.currentX = 1;
+		$(document).trigger($.Event('mousemove', { pageX: 2, pageY: 3 }));
+		strictEqual(session.currentX, 1, 'document event removed');
 
 		// try to recreate and reopen a new powerTip
 		stop();
