@@ -36,6 +36,7 @@
 		"strictEqual": false,
 		"notStrictEqual": false,
 		"start": false,
+		"stop": false,
 
 		"DATA_DISPLAYCONTROLLER": false,
 		"DATA_HASACTIVEHOVER": false,
