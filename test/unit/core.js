@@ -272,6 +272,9 @@ $(function() {
 		element.remove();
 
 		ok(true, 'PowerTip handled its target disappearing before mouseenter gracefully');
+
+		// tear down
+		element.powerTip('destroy').remove();
 	});
 
 	test('PowerTip will handle disappearing targets gracefully (mouseleave)', function() {
@@ -292,17 +295,22 @@ $(function() {
 		tipElem.trigger('mouseleave');
 
 		ok(true, 'PowerTip handled its target disappearing before mouseleave gracefully');
+
+		// tear down
+		element.powerTip('destroy').remove();
 	});
 
-	test('API destroy method will not fail when rapidly created, shown, and destroyed', function() {
+	asyncTest('API destroy method will not fail when rapidly created, shown, and destroyed', function() {
 		expect(6);
 
-		// run PowerTip
+		// create powerTip
 		var element = $('<a href="#" title="This is the tooltip text"></a>')
 			.powerTip()
 			.on({
 				powerTipClose: function() {
 					$(this).powerTip('destroy');
+					makeAssertions();
+					start();
 				}
 			});
 
@@ -317,32 +325,91 @@ $(function() {
 		// placeholder message to show on script error
 		ok(true, 'PowerTip re-created, shown, hidden, and destroyed without error');
 
-		// check that elements were really destroyed
-		strictEqual(session.tooltips, null, 'PowerTip tooltip removed internally');
-		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 0, 'tooltip element removed');
+		// give the popup time to close, for destroy to fire
+		function makeAssertions() {
+			// check that elements were really destroyed
+			strictEqual(session.tooltips, null, 'PowerTip tooltip removed internally');
+			strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 0, 'tooltip element removed');
 
-		// check that events have been unhooked
-		session.currentX = 1;
-		$(document).trigger($.Event('mousemove', { pageX: 2, pageY: 3 }));
-		strictEqual(session.currentX, 1, 'document event removed');
+			// check that events have been unhooked
+			session.currentX = 1;
+			$(document).trigger($.Event('mousemove', { pageX: 2, pageY: 3 }));
+			strictEqual(session.currentX, 1, 'document event removed');
 
-		// try to recreate and reopen a new powerTip
-		stop();
-		setTimeout(function showAgain() {
-			var showCalled = false;
-			element.powerTip()
-				.data(
-					DATA_DISPLAYCONTROLLER,
-					new MockDisplayController(
-						function() {
-							showCalled = true;
-						}
-					)
-				);
-			element.powerTip('show');
-			ok(showCalled, 'PowerTip recreated and show was called without error');
-			start();
-		}, 20);
+			// try to recreate and reopen a new powerTip in a moment
+			stop();
+			setTimeout(function showAgain() {
+				var showCalled = false;
+				element.powerTip()
+					.data(
+						DATA_DISPLAYCONTROLLER,
+						new MockDisplayController(
+							function() {
+								showCalled = true;
+							}
+						)
+					);
+				element.powerTip('show');
+
+				ok(showCalled, 'PowerTip recreated and show was called without error');
+
+				// restart test
+				start();
+
+				// tear down
+				element.powerTip('destroy').remove();
+			}, 20);
+		}
+	});
+
+	test('powerTip can be instantiated multiple times on the same element without problem', function() {
+		// create element
+		var showCallCount = 0,
+			mockDisplayController = new MockDisplayController(
+				function() {
+					showCallCount++;
+				}
+			),
+			title = 'This is the tooltip text',
+			element = $('<a href="#" title="' + title + '"></a>');
+
+		// instantiate a first time
+		element.powerTip();
+		strictEqual(session.tooltips.length, 1, 'tooltip element created');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 1, 'tooltip element appended to DOM');
+		strictEqual(element.attr('title'), undefined, 'title attribute removed from target element');
+
+		element.data(DATA_DISPLAYCONTROLLER, mockDisplayController);
+		element.powerTip('show');
+		strictEqual(showCallCount, 1, 'tooltip can be shown after a single instantiation');
+
+		element.powerTip('destroy');
+		strictEqual(session.tooltips, null, 'tooltip element destroyed');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 0, 'tooltip element removed from DOM');
+		strictEqual(element.attr('title'), title, 'title attribute restored to target element');
+
+		// instantiate a couple of times
+		element.powerTip().powerTip();
+		strictEqual(session.tooltips.length, 1, 'tooltip element recreated');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 1, 'tooltip element reinserted into DOM');
+		strictEqual(element.attr('title'), undefined, 'title attribute removed from target element');
+
+		element.data(DATA_DISPLAYCONTROLLER, mockDisplayController);
+		element.powerTip('show');
+		strictEqual(showCallCount, 2, 'tooltip can be shown after multiple instantiations');
+
+		// test with an odd number of instantiations just to be safe
+		element.powerTip().powerTip().powerTip();
+		strictEqual(session.tooltips.length, 1, 'tooltip element still exists after a few more instantiations');
+		strictEqual($('#' + $.fn.powerTip.defaults.popupId).length, 1, 'tooltip element still exists in the DOM');
+		strictEqual(element.attr('title'), undefined, 'title attribute is still not present on target element');
+
+		element.data(DATA_DISPLAYCONTROLLER, mockDisplayController);
+		element.powerTip('show');
+		strictEqual(showCallCount, 3, 'tooltip is still shown correctly');
+
+		// tear down
+		element.powerTip('destroy').remove();
 	});
 
 	function MockDisplayController(show, hide, cancel, resetPosition) {

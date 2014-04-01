@@ -85,6 +85,18 @@ $.fn.powerTip = function(opts, arg) {
 		return $.powerTip[opts].call(targetElements, targetElements, arg);
 	}
 
+	// Handle repeated powerTip calls on the same element by destroying the
+	// original instance hooked to it and replacing it with this call.
+	// Do this first to make sure 1) the tooltip element is not inadvertently
+	// removed, and 2) the target elements get reset correctly before the data
+	// elements are read.
+	targetElements.each(function destroyPreviousInstance() {
+		var $this = $(this);
+		if ($this.data(DATA_DISPLAYCONTROLLER)) {
+			$.powerTip.destroy($this);
+		}
+	});
+
 	// extend options and instantiate TooltipController
 	options = $.extend({}, $.fn.powerTip.defaults, opts);
 	tipController = new TooltipController(options);
@@ -99,12 +111,6 @@ $.fn.powerTip = function(opts, arg) {
 			dataElem = $this.data(DATA_POWERTIPJQ),
 			dataTarget = $this.data(DATA_POWERTIPTARGET),
 			title;
-
-		// handle repeated powerTip calls on the same element by destroying the
-		// original instance hooked to it and replacing it with this call
-		if ($this.data(DATA_DISPLAYCONTROLLER)) {
-			$.powerTip.destroy($this);
-		}
 
 		// attempt to use title attribute text if there is no data-powertip,
 		// data-powertipjq or data-powertiptarget. If we do use the title
